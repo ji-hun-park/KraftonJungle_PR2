@@ -222,6 +222,13 @@ public:
 	}
 };
 
+// Define the triangle vertices
+struct FVertexSimple
+{
+	float x, y, z;    // Position
+	float r, g, b, a; // Color
+};
+
 // 각종 메시지를 처리할 함수
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
