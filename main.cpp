@@ -9,6 +9,13 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
+// Define the triangle vertices
+struct FVertexSimple
+{
+	float x, y, z;    // Position
+	float r, g, b, a; // Color
+};
+
 class URenderer
 {
 public:
@@ -250,13 +257,6 @@ public:
 	}
 };
 
-// Define the triangle vertices
-struct FVertexSimple
-{
-	float x, y, z;    // Position
-	float r, g, b, a; // Color
-};
-
 // 삼각형을 하드 코딩
 FVertexSimple triangle_vertices[] =
 {
@@ -351,6 +351,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		////////////////////////////////////////////
 		// 매번 실행되는 코드
+
+		// 준비 작업
+		renderer.Prepare();
+		renderer.PrepareShader();
+
+		// 생성한 버텍스 버퍼를 넘겨 실질적인 렌더링 요청
+		renderer.RenderPrimitive(vertexBuffer, numVertices);
 
 		// 현재 화면에 보여지는 버퍼와 그리기 작업을 위한 버퍼를 서로 교환합니다.
 		renderer.SwapBuffer();
