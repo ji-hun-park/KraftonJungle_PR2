@@ -230,7 +230,7 @@ struct FVertexSimple
 };
 
 // 삼각형을 하드 코딩
-FVertexSimple TriangleVertices[] =
+FVertexSimple triangle_vertices[] =
 {
 	{ 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f }, // Top vertex (red)
 	{ 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f }, // Bottom-right vertex (green)
@@ -278,10 +278,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// D3D11 생성하는 함수를 호출합니다.
 	renderer.Create(hWnd);
 
-	bool bIsExit = false;
-
 	// 렌더러 생성 직후에 쉐이더를 생성하는 함수를 호출합니다.
 	renderer.CreateShader();
+
+	// Renderer와 Shader 생성 이후에 버텍스 버퍼를 생성합니다.
+	FVertexSimple* vertices = triangle_vertices;
+	UINT ByteWidth = sizeof(triangle_vertices);
+	UINT numVertices = sizeof(triangle_vertices) / sizeof(FVertexSimple) ;
+
+	// 버텍스 생성
+	D3D11_BUFFER_DESC vertexbufferdesc = {};
+	vertexbufferdesc.ByteWidth = ByteWidth;
+	vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;
+	vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { vertices };
+
+	ID3D11Buffer* vertexBuffer;
+
+	renderer.Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
+
+	bool bIsExit = false;
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
@@ -313,6 +330,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// D3D11 소멸 시키는 함수를 호출합니다.
+	vertexBuffer->Release();
 	renderer.ReleaseShader();
 	renderer.Release();
 
