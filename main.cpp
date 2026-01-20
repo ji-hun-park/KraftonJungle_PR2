@@ -170,7 +170,7 @@ public:
 };
 
 // 각종 메시지를 처리할 함수
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -179,7 +179,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(hwnd, message, wParam, lParam);
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	return 0;
@@ -200,10 +200,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RegisterClassW(&wndclass);
 
 	// 1024 x 1024 크기의 윈도우 생성
-	HWND hwnd = CreateWindowExW(0, WindowClass, Title, WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
+	HWND hWnd = CreateWindowExW(0, WindowClass, Title, WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 1024, 1024,
 		nullptr, nullptr, hInstance, nullptr);
 	
+	// Renderer Class를 생성합니다.
+	URenderer renderer;
+
+	// D3D11 생성하는 함수를 호출합니다.
+	renderer.Create(hWnd);
+
 	bool bIsExit = false;
 
 	// 각종 생성 코드
@@ -232,10 +238,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		////////////////////////////////////////////
 		// 매번 실행되는 코드
 
+		// 현재 화면에 보여지는 버퍼와 그리기 작업을 위한 버퍼를 서로 교환합니다.
+		renderer.SwapBuffer();
 		////////////////////////////////////////////
 	}
 
-	// 소멸하는 코드
+	// D3D11 소멸 시키는 함수를 호출합니다.
+	renderer.Release();
 
 	return 0;
 }
