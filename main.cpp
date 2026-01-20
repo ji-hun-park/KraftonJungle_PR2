@@ -265,7 +265,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	bool bIsExit = false;
 
-	// 각종 생성 코드
+	// 렌더러 생성 직후에 쉐이더를 생성하는 함수를 호출합니다.
+	renderer.CreateShader();
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
@@ -297,6 +298,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// D3D11 소멸 시키는 함수를 호출합니다.
+	renderer.ReleaseShader();
 	renderer.Release();
 
 	return 0;
