@@ -12,6 +12,59 @@
 class URenderer
 {
 public:
+	// 쉐이더 관련
+	ID3D11VertexShader* SimpleVertexShader;
+	ID3D11PixelShader* SimplePixelShader;
+	ID3D11InputLayout* SimpleInputLayout;
+	unsigned int Stride;
+	
+	void CreateShader()
+	{
+		ID3DBlob* vertexshaderCSO;
+		ID3DBlob* pixelshaderCSO;
+
+		D3DCompileFromFile(L"ShaderW0.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &vertexshaderCSO, nullptr);
+
+		Device->CreateVertexShader(vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), nullptr, &SimpleVertexShader);
+
+		D3DCompileFromFile(L"ShaderW0.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &pixelshaderCSO, nullptr);
+
+		Device->CreatePixelShader(pixelshaderCSO->GetBufferPointer(), pixelshaderCSO->GetBufferSize(), nullptr, &SimplePixelShader);
+
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		Device->CreateInputLayout(layout, ARRAYSIZE(layout), vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), &SimpleInputLayout);
+
+		Stride = sizeof(FVertexSimple);
+
+		vertexshaderCSO->Release();
+		pixelshaderCSO->Release();
+	}
+
+	void ReleaseShader()
+	{
+		if (SimpleInputLayout)
+		{
+			SimpleInputLayout->Release();
+			SimpleInputLayout = nullptr;
+		}
+		if (SimplePixelShader)
+		{
+			SimplePixelShader->Release();
+			SimplePixelShader = nullptr;
+		}
+		if (SimpleVertexShader)
+		{
+			SimpleVertexShader->Release();
+			SimpleVertexShader = nullptr;
+		}
+	}
+
+public:
 	// Direct3D 11 장치(Device)와 장치 컨텍스트(Device Context) 및 스왑 체인(Swap Chain)을 관리하기 위한 포인터들
 	ID3D11Device* Device = nullptr; // GPU와 통신하기 위한 Direct3D 장치
 	ID3D11DeviceContext* DeviceContext = nullptr; // GPU 명령 실행을 담당하는 컨텍스트
