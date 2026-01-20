@@ -229,6 +229,14 @@ struct FVertexSimple
 	float r, g, b, a; // Color
 };
 
+// 삼각형을 하드 코딩
+FVertexSimple TriangleVertices[] =
+{
+	{ 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f }, // Top vertex (red)
+	{ 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f }, // Bottom-right vertex (green)
+	{-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f }  // Bottom-left vertex (blue)
+};
+
 // 각종 메시지를 처리할 함수
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
