@@ -220,6 +220,34 @@ public:
 	{
 		SwapChain->Present(1, 0); // 1: VSync È°¼ºÈ­
 	}
+
+	void Prepare()
+	{
+		DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
+
+		DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		DeviceContext->RSSetViewports(1, &ViewportInfo);
+		DeviceContext->RSSetState(RasterizerState);
+
+		DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, nullptr);
+		DeviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+	}
+
+	void PrepareShader()
+	{
+		DeviceContext->VSSetShader(SimpleVertexShader, nullptr, 0);
+		DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
+		DeviceContext->IASetInputLayout(SimpleInputLayout);
+	}
+
+	void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices)
+	{
+		UINT offset = 0;
+		DeviceContext->IASetVertexBuffers(0, 1, &pBuffer, &Stride, &offset);
+
+		DeviceContext->Draw(numVertices, 0);
+	}
 };
 
 // Define the triangle vertices
