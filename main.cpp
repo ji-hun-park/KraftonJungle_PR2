@@ -405,33 +405,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplWin32_Init((void*)hWnd);
 	ImGui_ImplDX11_Init(renderer.Device, renderer.DeviceContext);
 
-	// Renderer와 Shader 생성 이후에 버텍스 버퍼를 생성합니다.
-	FVertexSimple* vertices = sphere_vertices;
-	UINT ByteWidth = sizeof(sphere_vertices);
-	UINT numVertices = sizeof(sphere_vertices) / sizeof(FVertexSimple) ;
-
-	// 버텍스 버퍼로 넘기기 전에 Scale Down합니다.
-	float scaleMod = 0.1f;
-
-	for (UINT i = 0; i < numVertices; ++i)
-	{
-		sphere_vertices[i].x *= scaleMod;
-		sphere_vertices[i].y *= scaleMod;
-		sphere_vertices[i].z *= scaleMod;
-	}
-
-	// 버텍스 생성
-	D3D11_BUFFER_DESC vertexbufferdesc = {};
-	vertexbufferdesc.ByteWidth = ByteWidth;
-	vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;
-	vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { vertices };
-
-	ID3D11Buffer* vertexBuffer;
-
-	renderer.Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
-
 	bool bIsExit = false;
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
