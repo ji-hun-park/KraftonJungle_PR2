@@ -485,7 +485,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui::DestroyContext();
 
 	// D3D11 소멸 시키는 함수를 호출합니다.
-	vertexBuffer->Release();
+	renderer.ReleaseVertexBuffer(vertexBufferTriangle);
+	renderer.ReleaseVertexBuffer(vertexBufferCube);
+	renderer.ReleaseVertexBuffer(vertexBufferSphere);
 	renderer.ReleaseShader();
 	renderer.Release();
 
