@@ -492,6 +492,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
 	bool bIsExit = false;	// 종료 플래그
 
+	// 화면 경계 설정
+	const float leftBorder = -1.0f;
+	const float rightBorder = 1.0f;
+	const float topBorder = -1.0f;
+	const float bottomBorder = 1.0f;
+	const float sphereRadius = 1.0f;
+
+	// 경계 벗어남 허용 플래그
+	bool bBoundBallToScreen = true;
+
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
 	{
@@ -582,6 +592,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 		*/
+		ImGui::Checkbox("Bound Ball To Screen", &bBoundBallToScreen);
 		ImGui::End();
 
 		ImGui::Render();
