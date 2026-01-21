@@ -541,6 +541,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				{
 					offset.y -= 0.01f;
 				}
+				// 키보드 처리 직후에 하면 밖을 벗어났다면 화면 안쪽으로 위치시킨다.
+				// 화면을 벗어나지 않아야 한다면
+				if (bBoundBallToScreen)
+				{
+					float renderRadius = sphereRadius * scaleMod;
+					if (offset.x < leftBorder + renderRadius)
+					{
+						offset.x = leftBorder + renderRadius;
+					}
+					if (offset.x > rightBorder - renderRadius)
+					{
+						offset.x = rightBorder - renderRadius;
+					}
+					if (offset.y < topBorder + renderRadius)
+					{
+						offset.y = topBorder + renderRadius;
+					}
+					if (offset.y > bottomBorder - renderRadius)
+					{
+						offset.y = bottomBorder - renderRadius;
+					}
+				}
 			}
 		}
 
