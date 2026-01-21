@@ -463,8 +463,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		renderer.Prepare();
 		renderer.PrepareShader();
 
-		// 생성한 버텍스 버퍼를 넘겨 실질적인 렌더링 요청
-		renderer.RenderPrimitive(vertexBuffer, numVertices);
+		// 아래 Switch를 통해서 현재 Primitive Type에 맞춰서 VertexBuffer와 numVertices 변수를 선택합니다.
+		switch (typePrimitive)
+		{
+		case EPT_Triangle:
+			renderer.RenderPrimitive(vertexBufferTriangle, numVerticesTriangle);
+			break;
+		case EPT_Cube:
+			renderer.RenderPrimitive(vertexBufferCube, numVerticesCube);
+			break;
+		case EPT_Sphere:
+			renderer.RenderPrimitive(vertexBufferSphere, numVerticesSphere);
+			break;
+		}
 
 		// ImGui 렌더링 준비
 		ImGui_ImplDX11_NewFrame();
