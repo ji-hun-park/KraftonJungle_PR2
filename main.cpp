@@ -325,6 +325,12 @@ public:
 		DeviceContext->VSSetShader(SimpleVertexShader, nullptr, 0);
 		DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
 		DeviceContext->IASetInputLayout(SimpleInputLayout);
+
+		// 버텍스 쉐이더에 상수 버퍼를 설정합니다.
+		if (ConstantBuffer)
+		{
+			DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
+		}
 	}
 
 	void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices)
