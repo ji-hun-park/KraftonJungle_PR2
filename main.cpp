@@ -388,6 +388,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UINT ByteWidth = sizeof(sphere_vertices);
 	UINT numVertices = sizeof(sphere_vertices) / sizeof(FVertexSimple) ;
 
+	// 버텍스 버퍼로 넘기기 전에 Scale Down합니다.
+	float scaleMod = 0.1f;
+
+	for (UINT i = 0; i < numVertices; ++i)
+	{
+		sphere_vertices[i].x *= scaleMod;
+		sphere_vertices[i].y *= scaleMod;
+		sphere_vertices[i].z *= scaleMod;
+	}
+
 	// 버텍스 생성
 	D3D11_BUFFER_DESC vertexbufferdesc = {};
 	vertexbufferdesc.ByteWidth = ByteWidth;
