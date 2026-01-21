@@ -384,6 +384,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		////////////////////////////////////////////
 	}
 
+	// 여기에서 ImGui 소멸
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
 	// D3D11 소멸 시키는 함수를 호출합니다.
 	vertexBuffer->Release();
 	renderer.ReleaseShader();
