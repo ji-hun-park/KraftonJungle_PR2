@@ -520,6 +520,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
 	{
+		// 루프 시작 시간 기록
+		QueryPerformanceCounter(&startTime);
+
 		MSG msg;
 
 		// 처리할 메시지가 더 이상 없을때 까지 수행
@@ -665,6 +668,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		// 현재 화면에 보여지는 버퍼와 그리기 작업을 위한 버퍼를 서로 교환합니다.
 		renderer.SwapBuffer();
+
+		// 시간 지연용 루프
+		do
+		{
+			Sleep(0);
+
+			// 루프 종료 시간 기록
+			QueryPerformanceCounter(&endTime);
+
+			// 한 프레임이 소요된 시간 계산 (밀리초 단위로 변환)
+			elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.0 / frequency.QuadPart;
+
+		} while (elapsedTime < targetFrameTime);
 	}
 
 	// 여기에서 ImGui 소멸
