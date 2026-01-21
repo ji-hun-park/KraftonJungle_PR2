@@ -490,6 +490,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Main 루프 바로 전 설정들.	
 	FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
+	FVector	velocity(0.0f); // 도형의 속도를 담을 velocity 변수
 	bool bIsExit = false;	// 종료 플래그
 
 	// 화면 경계 설정
@@ -499,8 +500,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	const float bottomBorder = 1.0f;
 	const float sphereRadius = 1.0f;
 
-	// 경계 벗어남 허용 플래그
-	bool bBoundBallToScreen = true;
+	bool bBoundBallToScreen = true; // 경계 벗어남 허용 플래그
+	bool bPinballMovement = true;   // 핀볼 움직임 허용 플래그
+
+	velocity.x = ((float)(rand() % 100 - 50)) * 0.001f;
+	velocity.y = ((float)(rand() % 100 - 50)) * 0.001f;
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
@@ -561,6 +565,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					if (offset.y > bottomBorder - renderRadius)
 					{
 						offset.y = bottomBorder - renderRadius;
+					}
+				}
+				// 핀볼 움직임이 켜져 있다면
+				if (bPinballMovement)
+				{
+					// 속도를 공위치에 더해 공을 실질적으로 움직임
+					offset.x += velocity.x;
+					offset.y += velocity.y;
+					offset.z += velocity.z;
+
+					// 벽과 충돌 여부를 체크하고 충돌시 속도에 음수를 곱해 방향을 바꿈
+					float renderRadius = sphereRadius * scaleMod;
+					if (offset.x < leftBorder + renderRadius)
+					{
+						velocity.x *= -1.0f;
+					}
+					if (offset.x > rightBorder - renderRadius)
+					{
+						velocity.x *= -1.0f;
+					}
+					if (offset.y < topBorder + renderRadius)
+					{
+						velocity.y *= -1.0f;
+					}
+					if (offset.y > bottomBorder - renderRadius)
+					{
+						velocity.y *= -1.0f;
 					}
 				}
 			}
