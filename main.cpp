@@ -382,9 +382,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplDX11_Init(renderer.Device, renderer.DeviceContext);
 
 	// Renderer와 Shader 생성 이후에 버텍스 버퍼를 생성합니다.
-	FVertexSimple* vertices = triangle_vertices;
-	UINT ByteWidth = sizeof(triangle_vertices);
-	UINT numVertices = sizeof(triangle_vertices) / sizeof(FVertexSimple) ;
+	FVertexSimple* vertices = cube_vertices;
+	UINT ByteWidth = sizeof(cube_vertices);
+	UINT numVertices = sizeof(cube_vertices) / sizeof(FVertexSimple) ;
 
 	// 버텍스 생성
 	D3D11_BUFFER_DESC vertexbufferdesc = {};
