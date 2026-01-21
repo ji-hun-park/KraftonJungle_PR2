@@ -230,6 +230,28 @@ public:
 		ReleaseDeviceAndSwapChain();
 	}
 
+	ID3D11Buffer* CreateVertexBuffer(FVertexSimple* vertices, UINT byteWidth)
+	{
+		// Create a vertex buffer
+		D3D11_BUFFER_DESC vertexbufferdesc = {};
+		vertexbufferdesc.ByteWidth = byteWidth;
+		vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE; // will never be updated 
+		vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA vertexbufferSRD = { vertices };
+
+		ID3D11Buffer* vertexBuffer;
+
+		Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
+
+		return vertexBuffer;
+	}
+
+	void ReleaseVertexBuffer(ID3D11Buffer* vertexBuffer)
+	{
+		vertexBuffer->Release();
+	}
+
 	// 스왑 체인의 백 버퍼와 프론트 버퍼를 교체하여 화면에 출력
 	void SwapBuffer()
 	{
