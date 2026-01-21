@@ -423,6 +423,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ID3D11Buffer* vertexBufferCube = renderer.CreateVertexBuffer(cube_vertices, sizeof(cube_vertices));
 	ID3D11Buffer* vertexBufferSphere = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
 
+	enum ETypePrimitive
+	{
+		EPT_Triangle,
+		EPT_Cube,
+		EPT_Sphere,
+		EPT_Max,
+	};
+
+	ETypePrimitive typePrimitive = EPT_Triangle;
+
 	bool bIsExit = false;	// 종료 플래그
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
@@ -488,6 +498,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	renderer.ReleaseVertexBuffer(vertexBufferTriangle);
 	renderer.ReleaseVertexBuffer(vertexBufferCube);
 	renderer.ReleaseVertexBuffer(vertexBufferSphere);
+
 	renderer.ReleaseShader();
 	renderer.Release();
 
