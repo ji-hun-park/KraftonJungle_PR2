@@ -491,6 +491,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ETypePrimitive typePrimitive = EPT_Triangle;
 
+	// Main 루프 바로 전 설정들.	
+	FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
 	bool bIsExit = false;	// 종료 플래그
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
@@ -512,9 +514,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				bIsExit = true;
 				break;
 			}
+			else if (msg.message == WM_KEYDOWN) // 키보드 눌렸을 때
+			{
+				// 눌린 키가 방향키라면 해당 방향에 맞춰서
+				// offset 변수의 x, y 맴버 변수의 값을 조정합니다.
+				if (msg.wParam == VK_LEFT)
+				{
+					offset.x -= 0.01f;
+				}
+				if (msg.wParam == VK_RIGHT)
+				{
+					offset.x += 0.01f;
+				}
+				if (msg.wParam == VK_UP)
+				{
+					offset.y += 0.01f;
+				}
+				if (msg.wParam == VK_DOWN)
+				{
+					offset.y -= 0.01f;
+				}
+			}
 		}
 
-		////////////////////////////////////////////
 		// 매번 실행되는 코드
 
 		// 준비 작업
@@ -565,7 +587,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		// 현재 화면에 보여지는 버퍼와 그리기 작업을 위한 버퍼를 서로 교환합니다.
 		renderer.SwapBuffer();
-		////////////////////////////////////////////
 	}
 
 	// 여기에서 ImGui 소멸
