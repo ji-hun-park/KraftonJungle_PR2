@@ -387,6 +387,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// 이후 ImGui UI 컨트롤 추가는 ImGui::NewFrame()과 ImGui::Render() 사이인 여기에 위치합니다.
 		ImGui::Begin("Jungle Property Window");
 		ImGui::Text("Hello Jungle World!");
+		if (ImGui::Button("Quit this app"))
+		{
+			// 현재 윈도우에 Quit 메시지를 메시지 큐로 보냄
+			PostMessage(hWnd, WM_QUIT, 0, 0);
+		}
 		ImGui::End();
 
 		ImGui::Render();
