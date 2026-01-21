@@ -105,8 +105,6 @@ public:
 		float Pad;
 	};
 
-	ID3D11Buffer* ConstantBuffer = nullptr;
-
 	void CreateConstantBuffer()
 	{
 		D3D11_BUFFER_DESC constantbufferdesc = {};
