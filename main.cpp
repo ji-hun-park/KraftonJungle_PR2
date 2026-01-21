@@ -646,6 +646,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		*/
 		ImGui::Checkbox("Bound Ball To Screen", &bBoundBallToScreen);
+		ImGui::Checkbox("Pinball Movement", &bPinballMovement);
 		ImGui::End();
 
 		ImGui::Render();
