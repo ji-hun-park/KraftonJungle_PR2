@@ -543,6 +543,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		renderer.Prepare();
 		renderer.PrepareShader();
 
+		// offset을 상수 버퍼로 업데이트 합니다.
+		renderer.UpdateConstant(offset);
+
 		// 아래 Switch를 통해서 현재 Primitive Type에 맞춰서 VertexBuffer와 numVertices 변수를 선택합니다.
 		switch (typePrimitive)
 		{
