@@ -322,6 +322,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 렌더러 생성 직후에 쉐이더를 생성하는 함수를 호출합니다.
 	renderer.CreateShader();
 
+	// 여기에서 ImGui를 생성합니다.
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui_ImplWin32_Init((void*)hWnd);
+	ImGui_ImplDX11_Init(renderer.Device, renderer.DeviceContext);
+
 	// Renderer와 Shader 생성 이후에 버텍스 버퍼를 생성합니다.
 	FVertexSimple* vertices = triangle_vertices;
 	UINT ByteWidth = sizeof(triangle_vertices);
