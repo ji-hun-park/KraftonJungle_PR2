@@ -405,7 +405,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplWin32_Init((void*)hWnd);
 	ImGui_ImplDX11_Init(renderer.Device, renderer.DeviceContext);
 
-	bool bIsExit = false;
+	// Create a vertex buffer
+	UINT numVerticesTriangle = sizeof(triangle_vertices) / sizeof(FVertexSimple);
+	UINT numVerticesCube = sizeof(cube_vertices) / sizeof(FVertexSimple);
+	UINT numVerticesSphere = sizeof(sphere_vertices) / sizeof(FVertexSimple);
+
+	float scaleMod = 0.1f;
+
+	for (UINT i = 0; i < numVerticesSphere; ++i)
+	{
+		sphere_vertices[i].x *= scaleMod;
+		sphere_vertices[i].y *= scaleMod;
+		sphere_vertices[i].z *= scaleMod;
+	}
+
+	ID3D11Buffer* vertexBufferTriangle = renderer.CreateVertexBuffer(triangle_vertices, sizeof(triangle_vertices));
+	ID3D11Buffer* vertexBufferCube = renderer.CreateVertexBuffer(cube_vertices, sizeof(cube_vertices));
+	ID3D11Buffer* vertexBufferSphere = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
+
+	bool bIsExit = false;	// 종료 플래그
 
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
