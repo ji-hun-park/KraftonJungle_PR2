@@ -22,6 +22,8 @@ struct FVertexSimple
 	float r, g, b, a; // Color
 };
 
+#include "Sphere.h"
+
 class URenderer
 {
 public:
@@ -382,9 +384,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplDX11_Init(renderer.Device, renderer.DeviceContext);
 
 	// Renderer와 Shader 생성 이후에 버텍스 버퍼를 생성합니다.
-	FVertexSimple* vertices = cube_vertices;
-	UINT ByteWidth = sizeof(cube_vertices);
-	UINT numVertices = sizeof(cube_vertices) / sizeof(FVertexSimple) ;
+	FVertexSimple* vertices = sphere_vertices;
+	UINT ByteWidth = sizeof(sphere_vertices);
+	UINT numVertices = sizeof(sphere_vertices) / sizeof(FVertexSimple) ;
 
 	// 버텍스 생성
 	D3D11_BUFFER_DESC vertexbufferdesc = {};
