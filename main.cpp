@@ -453,6 +453,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 렌더러 생성 직후에 쉐이더를 생성하는 함수를 호출합니다.
 	renderer.CreateShader();
 
+	// 상수 버퍼를 생성하는 함수를 호출합니다.
+	renderer.CreateConstantBuffer();
+
 	// 여기에서 ImGui를 생성합니다.
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -575,6 +578,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	renderer.ReleaseVertexBuffer(vertexBufferCube);
 	renderer.ReleaseVertexBuffer(vertexBufferSphere);
 
+	renderer.ReleaseConstantBuffer();
 	renderer.ReleaseShader();
 	renderer.Release();
 
