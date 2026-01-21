@@ -271,6 +271,8 @@ FVertexSimple triangle_vertices[] =
 	{-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f }  // Bottom-left vertex (blue)
 };
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 // 각종 메시지를 처리할 함수
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
