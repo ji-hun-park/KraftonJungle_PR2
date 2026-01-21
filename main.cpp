@@ -506,6 +506,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	velocity.x = ((float)(rand() % 100 - 50)) * 0.001f;
 	velocity.y = ((float)(rand() % 100 - 50)) * 0.001f;
 
+	// FPS 제한을 위한 설정
+	const int targetFPS = 30;
+	const double targetFrameTime = 1000.0 / targetFPS; // 한 프레임의 목표 시간 (밀리초 단위)
+
+	// 고성능 타이머 초기화
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+
+	LARGE_INTEGER startTime, endTime;
+	double elapsedTime = 0.0;
+
 	// Main Loop (Quit Message가 들어오기 전까지 아래 Loop를 무한히 실행하게 됨)
 	while (bIsExit == false)
 	{
@@ -567,32 +578,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						offset.y = bottomBorder - renderRadius;
 					}
 				}
-				// 핀볼 움직임이 켜져 있다면
-				if (bPinballMovement)
-				{
-					// 속도를 공위치에 더해 공을 실질적으로 움직임
-					offset.x += velocity.x;
-					offset.y += velocity.y;
-					offset.z += velocity.z;
+			}
+			// 핀볼 움직임이 켜져 있다면
+			if (bPinballMovement)
+			{
+				// 속도를 공위치에 더해 공을 실질적으로 움직임
+				offset.x += velocity.x;
+				offset.y += velocity.y;
+				offset.z += velocity.z;
 
-					// 벽과 충돌 여부를 체크하고 충돌시 속도에 음수를 곱해 방향을 바꿈
-					float renderRadius = sphereRadius * scaleMod;
-					if (offset.x < leftBorder + renderRadius)
-					{
-						velocity.x *= -1.0f;
-					}
-					if (offset.x > rightBorder - renderRadius)
-					{
-						velocity.x *= -1.0f;
-					}
-					if (offset.y < topBorder + renderRadius)
-					{
-						velocity.y *= -1.0f;
-					}
-					if (offset.y > bottomBorder - renderRadius)
-					{
-						velocity.y *= -1.0f;
-					}
+				// 벽과 충돌 여부를 체크하고 충돌시 속도에 음수를 곱해 방향을 바꿈
+				float renderRadius = sphereRadius * scaleMod;
+				if (offset.x < leftBorder + renderRadius)
+				{
+					velocity.x *= -1.0f;
+				}
+				if (offset.x > rightBorder - renderRadius)
+				{
+					velocity.x *= -1.0f;
+				}
+				if (offset.y < topBorder + renderRadius)
+				{
+					velocity.y *= -1.0f;
+				}
+				if (offset.y > bottomBorder - renderRadius)
+				{
+					velocity.y *= -1.0f;
 				}
 			}
 		}
