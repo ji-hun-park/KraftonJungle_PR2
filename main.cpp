@@ -486,7 +486,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		EPT_Max,
 	};
 
-	ETypePrimitive typePrimitive = EPT_Triangle;
+	ETypePrimitive typePrimitive = EPT_Sphere;
 
 	// Main 루프 바로 전 설정들.	
 	FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
@@ -565,6 +565,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// 이후 ImGui UI 컨트롤 추가는 ImGui::NewFrame()과 ImGui::Render() 사이인 여기에 위치합니다.
 		ImGui::Begin("Jungle Property Window");
 		ImGui::Text("Hello Jungle World!");
+		/* 도형 변경 버튼
 		if (ImGui::Button("Change primitive"))
 		{
 			switch (typePrimitive)
@@ -580,6 +581,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				break;
 			}
 		}
+		*/
 		ImGui::End();
 
 		ImGui::Render();
