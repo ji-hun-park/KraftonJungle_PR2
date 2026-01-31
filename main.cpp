@@ -390,13 +390,16 @@ public:
 	}
 };
 
-// 중력 관련 전역 변수
+// 전역 변수
+bool GbMergeMode = false;
 bool GbEnableGravity = true;
 float GGravity = -6.5f;
 
 class UPrimitive
 {
 public:
+	bool bIsDead = false;
+
 	virtual ~UPrimitive() {}
 	virtual void Update(float t) = 0;
 	virtual void Render(URenderer& renderer) = 0;
@@ -489,6 +492,11 @@ void UBall::Render(URenderer& renderer)
 
 bool UBall::bCollisionCheck(UPrimitive* other)
 {
+	if (this->bIsDead || other->bIsDead)
+	{
+		return false;
+	}
+
 	UBall* OtherBall = (UBall*)other;
 
 	FVector Delta = Location - OtherBall->Location;
@@ -497,6 +505,26 @@ bool UBall::bCollisionCheck(UPrimitive* other)
 
 	if (DistSq < MinDist * MinDist)
 	{
+		// 합체 모드 추가 코드
+		if (GbMergeMode)
+		{
+			float NewMass = Mass + OtherBall->Mass;
+			float NewRadius = Radius + OtherBall->Radius;
+
+			FVector NewMomentum = (Velocity * Mass) + (OtherBall->Velocity * OtherBall->Mass);
+			Velocity = NewMomentum * (1.0f / NewMass);
+
+			FVector NewLocation = (Location * Mass) + (OtherBall->Location * OtherBall->Mass);
+			Location = NewLocation * (1.0f / NewMass);
+
+			Mass = NewMass;
+			Radius = NewRadius;
+
+			OtherBall->bIsDead = true;
+
+			return true;
+		}
+
 		float Dist = sqrtf(DistSq);
 		if (Dist == 0.0f)
 		{
@@ -885,8 +913,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		ImGui::Separator();
-
 		ImGui::Checkbox("Enable Gravity", &GbEnableGravity);
+
+		ImGui::Separator();
+		ImGui::Checkbox("Enable Merge Mode", &GbMergeMode);
+		ImGui::TextColored(ImVec4(1, 1, 0, 1), "If enabled, balls merge on collision.");
 
 		/* 도형 변경 버튼
 		if (ImGui::Button("Change primitive"))
@@ -967,6 +998,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{
 			PrimitiveList[i]->Render(renderer);
 		}
+
+		// 머지 기능 관련
+		int ActiveCount = 0;
+		for (int i = 0; i < ListCount; ++i)
+		{
+			if (PrimitiveList[i]->bIsDead)
+			{
+				delete PrimitiveList[i];
+				PrimitiveList[i] = nullptr;
+
+				if (TargetBallCount > 0)
+				{
+					TargetBallCount--;
+				}
+			}
+			else
+			{
+				if (ActiveCount != i)
+				{
+					PrimitiveList[ActiveCount] = PrimitiveList[i];
+					PrimitiveList[i] = nullptr;
+				}
+				ActiveCount++;
+			}
+		}
+		ListCount = ActiveCount;
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
