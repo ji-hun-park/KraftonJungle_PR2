@@ -1,5 +1,7 @@
 #include <windows.h>
 
+#include <string>
+
 // D3D 사용에 필요한 라이브러리들을 링크합니다.
 #pragma comment(lib, "user32")
 #pragma comment(lib, "d3d11")
@@ -22,12 +24,61 @@ struct FVertexSimple
 	float r, g, b, a; // Color
 };
 
+// 구체 헤더파일 포함
 #include "Sphere.h"
 
 struct FVector
 {
 	float x, y, z;
 	FVector(float _x = 0, float _y = 0, float _z = 0) : x(_x), y(_y), z(_z) {}
+
+	FVector operator+(const FVector& Other) const
+	{
+		return FVector(x + Other.x, y + Other.y, z + Other.z);
+	}
+	FVector operator-(const FVector& Other) const
+	{
+		return FVector(x - Other.x, y - Other.y, z - Other.z);
+	}
+	FVector operator*(float Scalar) const
+	{
+		return FVector(x * Scalar, y * Scalar, z * Scalar);
+	}
+	FVector operator+=(const FVector& Other)
+	{
+		x += Other.x;
+		y += Other.y;
+		z += Other.z;
+		return *this;
+	}
+	FVector operator-=(const FVector& Other)
+	{
+		x -= Other.x;
+		y -= Other.y;
+		z -= Other.z;
+		return *this;
+	}
+
+	float Length() const
+	{
+		return sqrtf(x * x + y * y + z * z);
+	}
+	float LengthSquared() const
+	{
+		return x * x + y * y + z * z;
+	}
+
+	FVector Normalize() const
+	{
+		float leng = Length();
+		if (leng > 0) return FVector(x / leng, y / leng, z / leng);
+		return FVector(0, 0, 0);
+	}
+
+	static float Dot(const FVector& a, const FVector& b)
+	{
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
 };
 
 class URenderer
@@ -102,7 +153,7 @@ public:
 	struct FConstants
 	{
 		FVector Offset;
-		float Pad;
+		float Scale;
 	};
 
 	void CreateConstantBuffer()
@@ -125,7 +176,7 @@ public:
 		}
 	}
 
-	void UpdateConstant(FVector Offset)
+	void UpdateConstant(FVector Offset, float Scale)
 	{
 		if (ConstantBuffer)
 		{
@@ -135,6 +186,7 @@ public:
 			FConstants* constants = (FConstants*)constantbufferMSR.pData;
 			{
 				constants->Offset = Offset;
+				constants->Scale = Scale;
 			}
 			DeviceContext->Unmap(ConstantBuffer, 0);
 		}
@@ -339,6 +391,152 @@ public:
 	}
 };
 
+// 중력 관련 전역 변수
+bool GbEnableGravity = false;
+float GGravityAccel = -3.5f;
+
+class UPrimitive
+{
+public:
+	virtual ~UPrimitive() {}
+	virtual void Update(float t) = 0;
+	virtual void Render(URenderer& renderer) = 0;
+	virtual bool bCollisinCheck(UPrimitive* other) = 0;
+	virtual void SetVelocity(const FVector& v) = 0;
+};
+
+class UBall : public UPrimitive
+{
+public:
+	FVector Location;
+	FVector Velocity;
+	float Radius;
+	float Mass;
+	static int TotalNumBalls;
+
+	// 생성자
+	UBall()
+	{
+		TotalNumBalls++;
+		float RandScale = (float)(rand() % 10 + 10) * 0.02f;
+		Radius = 1.0f * RandScale;
+		Mass = Radius * 10.0f;
+
+		Location = FVector((rand() % 100 - 50) * 0.01f, (rand() % 100 - 50) * 0.01f, 0.0f);
+		Velocity = FVector((rand() % 200 - 100) * 0.01f, (rand() % 200 - 100) * 0.01f, 0.0f);
+	}
+
+	// 소멸자
+	~UBall()
+	{
+		TotalNumBalls--;
+	}
+
+	void Update(float t) override;
+	void Render(URenderer& renderer) override;
+	bool bCollisinCheck(UPrimitive* other) override;
+	void SetVelocity(const FVector& v) override
+	{
+		Velocity = v;
+	}
+};
+
+int UBall::TotalNumBalls = 0;
+ID3D11Buffer* GSphereVertexBuffer = nullptr;
+UINT GNumSphereVertices = 0;
+
+void UBall::Update(float t)
+{
+	if (GbEnableGravity)
+	{
+		Velocity.y += GGravityAccel * t;
+	}
+
+	Location += Velocity * t;
+
+	const float LeftBound = -1.0f;
+	const float RightBound = 1.0f;
+	const float TopBound = 1.0f;
+	const float BottomBound = -1.0f;
+
+	if (Location.x - Radius < LeftBound)
+	{
+		Location.x = LeftBound + Radius;
+		Velocity.x *= -1.0f;
+	}
+	else if (Location.x + Radius > RightBound)
+	{
+		Location.x = RightBound - Radius;
+		Velocity.x *= -1.0f;
+	}
+
+	if (Location.y - Radius < BottomBound)
+	{
+		Location.y = BottomBound + Radius;
+		Velocity.y *= -1.0f;
+	}
+	else if (Location.y + Radius > TopBound)
+	{
+		Location.y = TopBound - Radius;
+		Velocity.y *= -1.0f;
+	}
+}
+
+void UBall::Render(URenderer& renderer)
+{
+	renderer.UpdateConstant(Location, Radius);
+	renderer.RenderPrimitive(GSphereVertexBuffer, GNumSphereVertices);
+}
+
+bool UBall::bCollisinCheck(UPrimitive* other)
+{
+	UBall* OtherBall = (UBall*)other;
+
+	FVector Delta = Location - OtherBall->Location;
+	float DistSq = Delta.LengthSquared();
+	float MinDist = Radius + OtherBall->Radius;
+
+	if (DistSq < MinDist * MinDist)
+	{
+		float Dist = sqrtf(DistSq);
+		if (Dist == 0.0f)
+		{
+			return false;
+		}
+
+		FVector Normal = Delta.Normalize();
+		float Overlap = MinDist - Dist;
+
+		float TotalMass = Mass + OtherBall->Mass;
+		float M1Ratio = OtherBall->Mass / TotalMass;
+		float M2Ratio = Mass / TotalMass;
+
+		Location += Normal * (Overlap * M1Ratio);
+		OtherBall->Location -= Normal * (Overlap * M2Ratio);
+
+		FVector RelVel = Velocity - OtherBall->Velocity;
+		float VelAlongNormal = FVector::Dot(RelVel, Normal);
+
+		if (VelAlongNormal > 0)
+		{
+			return false;
+		}
+
+		float Ela = 1.0f;
+
+		float ImMag = -(1 + Ela) * VelAlongNormal;
+		ImMag /= (1 / Mass + 1 / OtherBall->Mass);
+
+		FVector Impulse = Normal * ImMag;
+
+		Velocity += Impulse * (1 / Mass);
+		OtherBall->Velocity -= Impulse * (1 / OtherBall->Mass);
+
+		return true;
+	}
+	return false;
+}
+
 // 삼각형 하드 코딩
 FVertexSimple triangle_vertices[] =
 {
@@ -399,6 +597,7 @@ FVertexSimple cube_vertices[] =
 	{  0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.5f, 1.0f }, // Bottom-right (purple)
 };
 
+// 전역 변수
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // 각종 메시지를 처리할 함수
@@ -424,6 +623,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+	// 랜덤 시드 설정
+	srand(GetTickCount());
+
 	// 윈도우 클래스 이름
 	WCHAR WindowClass[] = L"JungleWindowClass";
 
@@ -474,6 +676,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		sphere_vertices[i].z *= scaleMod;
 	}
 
+	GSphereVertexBuffer = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
+	GNumSphereVertices = numVerticesSphere;
+
+	UPrimitive** PrimitiveList = nullptr;
+	int ListCapacity = 0;
+	int ListCount = 0;
+	int TargetBallCount = 1;
+
 	ID3D11Buffer* vertexBufferTriangle = renderer.CreateVertexBuffer(triangle_vertices, sizeof(triangle_vertices));
 	ID3D11Buffer* vertexBufferCube = renderer.CreateVertexBuffer(cube_vertices, sizeof(cube_vertices));
 	ID3D11Buffer* vertexBufferSphere = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
@@ -489,10 +699,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ETypePrimitive typePrimitive = EPT_Sphere;
 
 	// Main 루프 바로 전 설정들.	
-	FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
-	FVector	velocity(0.0f); // 도형의 속도를 담을 velocity 변수
+	//FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
+	//FVector	velocity(0.0f); // 도형의 속도를 담을 velocity 변수
+	
 	bool bIsExit = false;	// 종료 플래그
 
+	/*
 	// 화면 경계 설정
 	const float leftBorder = -1.0f;
 	const float rightBorder = 1.0f;
@@ -505,6 +717,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	velocity.x = ((float)(rand() % 100 - 50)) * 0.001f;
 	velocity.y = ((float)(rand() % 100 - 50)) * 0.001f;
+	*/
 
 	// FPS 제한을 위한 설정
 	const int targetFPS = 30;
@@ -539,6 +752,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				bIsExit = true;
 				break;
 			}
+
+			/* 기존 코드
 			else if (msg.message == WM_KEYDOWN) // 키보드 눌렸을 때
 			{
 				// 눌린 키가 방향키라면 해당 방향에 맞춰서
@@ -609,16 +824,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					velocity.y *= -1.0f;
 				}
 			}
+			*/
 		}
-
-		// 매번 실행되는 코드
 
 		// 준비 작업
 		renderer.Prepare();
 		renderer.PrepareShader();
 
 		// offset을 상수 버퍼로 업데이트 합니다.
-		renderer.UpdateConstant(offset);
+		//renderer.UpdateConstant(offset);
 
 		// 아래 Switch를 통해서 현재 Primitive Type에 맞춰서 VertexBuffer와 numVertices 변수를 선택합니다.
 		switch (typePrimitive)
@@ -642,6 +856,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// 이후 ImGui UI 컨트롤 추가는 ImGui::NewFrame()과 ImGui::Render() 사이인 여기에 위치합니다.
 		ImGui::Begin("Jungle Property Window");
 		ImGui::Text("Hello Jungle World!");
+		
+		ImGui::InputInt("Number of Balls", &TargetBallCount);
+		if (TargetBallCount < 0)
+		{
+			TargetBallCount = 0;
+		}
+
+		if (ImGui::Button("+ Add Ball"))
+		{
+			TargetBallCount++;
+		}
+		if (ImGui::Button("- Remove Ball"))
+		{
+			TargetBallCount--;
+		}
+
+		ImGui::Separator();
+
+		ImGui::Checkbox("Enable Gravity", &GbEnableGravity);
+
+		if (GbEnableGravity)
+		{
+			ImGui::SliderFloat("Gravity Accel", &GGravityAccel, -10.0f, -0.1f);
+		}
+
 		/* 도형 변경 버튼
 		if (ImGui::Button("Change primitive"))
 		{
@@ -658,10 +897,69 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				break;
 			}
 		}
-		*/
+		
 		ImGui::Checkbox("Bound Ball To Screen", &bBoundBallToScreen);
 		ImGui::Checkbox("Pinball Movement", &bPinballMovement);
+		*/
+
 		ImGui::End();
+
+		// 공 추가하기
+		while (ListCount < TargetBallCount)
+		{
+			if (ListCount >= ListCapacity)
+			{
+				int NewCapacity = (ListCapacity == 0) ? 10 : ListCapacity * 2;
+				UPrimitive** NewList = (UPrimitive**)malloc(sizeof(UPrimitive*) * NewCapacity);
+				
+				for (int i = 0; i < ListCount; ++i)
+				{
+					NewList[i] = PrimitiveList[i];
+				}
+
+				if (PrimitiveList)
+				{
+					free(PrimitiveList);
+				}
+
+				PrimitiveList = NewList;
+				ListCapacity = NewCapacity;
+			}
+			PrimitiveList[ListCount++] = new UBall();
+		}
+
+		// 공 삭제하기
+		while (ListCount > TargetBallCount && ListCount > 0)
+		{
+			int RemoveIdx = rand() % ListCount;
+
+			delete PrimitiveList[RemoveIdx];
+
+			PrimitiveList[RemoveIdx] = PrimitiveList[ListCount - 1];
+			PrimitiveList[ListCount - 1] = nullptr;
+			ListCount--;
+		}
+
+		// 피직스 업데이트와 충돌
+		float DT = 1.0f / (float)targetFPS;
+
+		for (int i = 0; i < ListCount; ++i)
+		{
+			PrimitiveList[i]->Update(DT);
+		}
+
+		for (int i = 0; i < ListCount; ++i)
+		{
+			for (int j = i + 1; j < ListCount; ++j)
+			{
+				PrimitiveList[i]->bCollisinCheck(PrimitiveList[j]);
+			}
+		}
+
+		for (int i = 0; i < ListCount; ++i)
+		{
+			PrimitiveList[i]->Render(renderer);
+		}
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -683,12 +981,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		} while (elapsedTime < targetFrameTime);
 	}
 
+	for (int i = 0; i < ListCount; ++i)
+	{
+		delete PrimitiveList[i];
+	}
+	if (PrimitiveList)
+	{
+		free(PrimitiveList);
+	}
+
 	// 여기에서 ImGui 소멸
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
 	// D3D11 소멸 시키는 함수를 호출합니다.
+	renderer.ReleaseVertexBuffer(GSphereVertexBuffer);
 	renderer.ReleaseVertexBuffer(vertexBufferTriangle);
 	renderer.ReleaseVertexBuffer(vertexBufferCube);
 	renderer.ReleaseVertexBuffer(vertexBufferSphere);
