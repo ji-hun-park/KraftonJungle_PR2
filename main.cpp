@@ -701,6 +701,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int ListCount = 0;
 	int TargetBallCount = 1;
 
+	/*
 	ID3D11Buffer* vertexBufferTriangle = renderer.CreateVertexBuffer(triangle_vertices, sizeof(triangle_vertices));
 	ID3D11Buffer* vertexBufferCube = renderer.CreateVertexBuffer(cube_vertices, sizeof(cube_vertices));
 	ID3D11Buffer* vertexBufferSphere = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
@@ -714,6 +715,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	};
 
 	ETypePrimitive typePrimitive = EPT_Sphere;
+	*/
 
 	// Main 루프 바로 전 설정들.	
 	//FVector	offset(0.0f);   // 도형의 움직임 정도를 담을 offset 변수
@@ -851,6 +853,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// offset을 상수 버퍼로 업데이트 합니다.
 		//renderer.UpdateConstant(offset);
 
+		/*
 		// 아래 Switch를 통해서 현재 Primitive Type에 맞춰서 VertexBuffer와 numVertices 변수를 선택합니다.
 		switch (typePrimitive)
 		{
@@ -864,6 +867,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			renderer.RenderPrimitive(vertexBufferSphere, numVerticesSphere);
 			break;
 		}
+		*/
 
 		// ImGui 렌더링 준비
 		ImGui_ImplDX11_NewFrame();
@@ -1000,10 +1004,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// D3D11 소멸 시키는 함수를 호출합니다.
 	renderer.ReleaseVertexBuffer(GSphereVertexBuffer);
+	/*
 	renderer.ReleaseVertexBuffer(vertexBufferTriangle);
 	renderer.ReleaseVertexBuffer(vertexBufferCube);
 	renderer.ReleaseVertexBuffer(vertexBufferSphere);
-
+	*/
 	renderer.ReleaseConstantBuffer();
 	renderer.ReleaseShader();
 	renderer.Release();
