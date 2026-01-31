@@ -401,7 +401,7 @@ public:
 	virtual ~UPrimitive() {}
 	virtual void Update(float t) = 0;
 	virtual void Render(URenderer& renderer) = 0;
-	virtual bool bCollisinCheck(UPrimitive* other) = 0;
+	virtual bool bCollisionCheck(UPrimitive* other) = 0;
 	virtual void SetVelocity(const FVector& v) = 0;
 };
 
@@ -418,7 +418,7 @@ public:
 	UBall()
 	{
 		TotalNumBalls++;
-		float RandScale = (float)(rand() % 10 + 10) * 0.02f;
+		float RandScale = (float)(rand() % 10 + 5) * 0.01f;
 		Radius = 1.0f * RandScale;
 		Mass = Radius * 10.0f;
 
@@ -434,7 +434,7 @@ public:
 
 	void Update(float t) override;
 	void Render(URenderer& renderer) override;
-	bool bCollisinCheck(UPrimitive* other) override;
+	bool bCollisionCheck(UPrimitive* other) override;
 	void SetVelocity(const FVector& v) override
 	{
 		Velocity = v;
@@ -488,7 +488,7 @@ void UBall::Render(URenderer& renderer)
 	renderer.RenderPrimitive(GSphereVertexBuffer, GNumSphereVertices);
 }
 
-bool UBall::bCollisinCheck(UPrimitive* other)
+bool UBall::bCollisionCheck(UPrimitive* other)
 {
 	UBall* OtherBall = (UBall*)other;
 
@@ -667,13 +667,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UINT numVerticesCube = sizeof(cube_vertices) / sizeof(FVertexSimple);
 	UINT numVerticesSphere = sizeof(sphere_vertices) / sizeof(FVertexSimple);
 
-	float scaleMod = 0.1f;
+	float MaxRadiusSq = 0.0f;
+	//float scaleMod = 0.1f;
 
 	for (UINT i = 0; i < numVerticesSphere; ++i)
 	{
-		sphere_vertices[i].x *= scaleMod;
-		sphere_vertices[i].y *= scaleMod;
-		sphere_vertices[i].z *= scaleMod;
+		float DistSq =
+			sphere_vertices[i].x * sphere_vertices[i].x +
+			sphere_vertices[i].y * sphere_vertices[i].y +
+			sphere_vertices[i].z * sphere_vertices[i].z;
+		
+		if (DistSq > MaxRadiusSq)
+		{
+			MaxRadiusSq = DistSq;
+		}
+	}
+	float MaxRadius = sqrtf(MaxRadiusSq);
+
+	if (MaxRadius > 0.0f)
+	{
+		for (UINT i = 0; i < numVerticesSphere; ++i)
+		{
+			sphere_vertices[i].x /= MaxRadius;
+			sphere_vertices[i].y /= MaxRadius;
+			sphere_vertices[i].z /= MaxRadius;
+		}
 	}
 
 	GSphereVertexBuffer = renderer.CreateVertexBuffer(sphere_vertices, sizeof(sphere_vertices));
@@ -863,15 +881,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			TargetBallCount = 0;
 		}
 
-		if (ImGui::Button("+ Add Ball"))
-		{
-			TargetBallCount++;
-		}
-		if (ImGui::Button("- Remove Ball"))
-		{
-			TargetBallCount--;
-		}
-
 		ImGui::Separator();
 
 		ImGui::Checkbox("Enable Gravity", &GbEnableGravity);
@@ -952,7 +961,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{
 			for (int j = i + 1; j < ListCount; ++j)
 			{
-				PrimitiveList[i]->bCollisinCheck(PrimitiveList[j]);
+				PrimitiveList[i]->bCollisionCheck(PrimitiveList[j]);
 			}
 		}
 
