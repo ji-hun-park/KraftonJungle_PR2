@@ -1,5 +1,4 @@
 #include <windows.h>
-
 #include <string>
 
 // D3D 사용에 필요한 라이브러리들을 링크합니다.
@@ -392,8 +391,8 @@ public:
 };
 
 // 중력 관련 전역 변수
-bool GbEnableGravity = false;
-float GGravityAccel = -3.5f;
+bool GbEnableGravity = true;
+float GGravity = -6.5f;
 
 class UPrimitive
 {
@@ -449,7 +448,7 @@ void UBall::Update(float t)
 {
 	if (GbEnableGravity)
 	{
-		Velocity.y += GGravityAccel * t;
+		Velocity.y += GGravity * t;
 	}
 
 	Location += Velocity * t;
@@ -884,11 +883,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		ImGui::Separator();
 
 		ImGui::Checkbox("Enable Gravity", &GbEnableGravity);
-
-		if (GbEnableGravity)
-		{
-			ImGui::SliderFloat("Gravity Accel", &GGravityAccel, -10.0f, -0.1f);
-		}
 
 		/* 도형 변경 버튼
 		if (ImGui::Button("Change primitive"))
